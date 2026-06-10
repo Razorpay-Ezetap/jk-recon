@@ -22,20 +22,20 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-gray-900">J&K Recon</h1>
-                        <p class="text-xs text-indigo-600 font-semibold">GitHub Server Engine</p>
+                        <p class="text-xs text-indigo-600 font-semibold">Matrix Link Engine</p>
                     </div>
                 </div>
 
                 <div class="px-5">
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Deployment Target</span>
-                        <p class="text-xs font-semibold text-slate-700 mt-0.5 truncate">GitHub Pages Cloud Server</p>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Resource</span>
+                        <p class="text-xs font-bold text-indigo-600 mt-0.5 truncate">database-1.json</p>
                     </div>
                 </div>
 
                 <div class="px-5">
                     <div id="status-badge" class="text-xs text-amber-700 flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Stream Connection Syncing...
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Querying database-1.json...
                     </div>
                 </div>
             </div>
@@ -49,7 +49,7 @@
             <header class="h-20 bg-white flex items-center justify-between px-8 border-b border-gray-200 shrink-0 shadow-sm z-10">
                 <div class="flex flex-col">
                     <h2 class="text-xl font-bold text-gray-900 leading-tight">Cloud Console</h2>
-                    <p class="text-xs text-gray-400">Queries look up live relation matrix rows as you type</p>
+                    <p class="text-xs text-gray-400">Queries look up live matrix rows as you type</p>
                 </div>
                 
                 <div class="flex-1 max-w-2xl mx-12">
@@ -99,7 +99,7 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white" id="main-table-body">
                                 <tr>
-                                    <td colspan="16" class="text-center text-gray-400 py-24 text-sm font-medium">Fetching secure data streams from cloud server nodes...</td>
+                                    <td colspan="16" class="text-center text-gray-400 py-24 text-sm font-medium">Extracting optimized storage database array streams...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -116,8 +116,9 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const badge = document.getElementById('status-badge');
             try {
-                const response = await fetch('database.json');
-                if(!response.ok) throw new Error("File fetch failure");
+                // FIXED TARGET ENDPOINT LINK TO SEARCH database-1.json
+                const response = await fetch('database-1.json');
+                if(!response.ok) throw new Error("Cloud stream mismatch");
                 
                 serverCloudDataPool = await response.json();
                 updateDashboardMetrics(serverCloudDataPool);
@@ -126,31 +127,31 @@
                 badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Server Cloud Online`;
                 
                 document.getElementById('live-search-input').removeAttribute('disabled');
-                showDefaultMessage("Cloud data stream active. Engine ready for real-time lookups.");
+                showDefaultMessage("Cloud data stream live. Engine ready for lookups.");
             } catch (err) {
                 badge.className = "text-xs text-rose-700 flex items-center gap-2 bg-rose-50 px-3 py-2 rounded-lg border border-rose-200";
-                badge.innerHTML = `⚠️ Database Stream Missing`;
+                badge.innerHTML = `⚠️ Data File Missing`;
                 document.getElementById('main-table-body').innerHTML = `
                     <tr>
                         <td colspan="16" class="text-center text-rose-500 py-24 text-sm font-semibold">
-                            ⚠️ Cloud Server Error: 'database.json' not found in repository. Ensure you committed it alongside index.html.
+                            ⚠️ Cloud Server Error: 'database-1.json' was not located in your GitHub folder. Please rename your data file to database-1.json and upload it.
                         </td>
                     </tr>`;
             }
         });
 
-        function updateDashboardMetrics(recordsArray) {
+        function updateDashboardMetrics(matrixPool) {
             let delivered = 0, transit = 0, rto = 0, repair = 0;
-            recordsArray.forEach(row => {
-                const statusStr = String(row.Status || "").toUpperCase();
-                const typeStr = String(row.OrderType || "").toUpperCase();
+            matrixPool.forEach(row => {
+                const statusStr = String(row[8] || "").toUpperCase();
+                const typeStr = String(row[12] || "").toUpperCase();
                 if (statusStr.includes("DELIVERED")) delivered++;
                 else if (statusStr.includes("TRANSIT")) transit++;
                 else if (statusStr.includes("RTO")) rto++;
                 if (typeStr.includes("REPAIR") || typeStr.includes("REPLACEMENT")) repair++;
             });
 
-            document.getElementById('kpi-total').innerText = recordsArray.length.toLocaleString();
+            document.getElementById('kpi-total').innerText = matrixPool.length.toLocaleString();
             document.getElementById('kpi-delivered').innerText = delivered.toLocaleString();
             document.getElementById('kpi-transit').innerText = transit.toLocaleString();
             document.getElementById('kpi-rto').innerText = rto.toLocaleString();
@@ -169,6 +170,10 @@
                 </tr>`;
         }
 
+        function formatVal(val) {
+            return (val === undefined || val === null || String(val).trim() === "") ? "-" : String(val).trim();
+        }
+
         function handleLiveTypingQuery(query) {
             const tbody = document.getElementById('main-table-body');
             if (!query.trim()) { showDefaultMessage("Ready for search. Type full VPA, DSN, or AWB parameters..."); return; }
@@ -176,9 +181,9 @@
             const cq = query.toLowerCase().trim();
             
             let directMatches = serverCloudDataPool.filter(item => {
-                return String(item.VPA || '').toLowerCase().trim() === cq || 
-                       String(item.DeviceSlNo || '').toLowerCase().trim() === cq || 
-                       String(item.CorrectAWB || '').toLowerCase().trim() === cq;
+                return String(item[2] || '').toLowerCase().trim() === cq || 
+                       String(item[1] || '').toLowerCase().trim() === cq || 
+                       String(item[7] || '').toLowerCase().trim() === cq;
             });
 
             if (directMatches.length === 0) {
@@ -187,48 +192,48 @@
             }
 
             let activeVPAs = new Set();
-            directMatches.forEach(item => { const vpaVal = String(item.VPA || '').trim(); if (vpaVal) activeVPAs.add(vpaVal.toLowerCase()); });
+            directMatches.forEach(item => { const vpaVal = String(item[2] || '').trim(); if (vpaVal) activeVPAs.add(vpaVal.toLowerCase()); });
 
             let finalResultSet = [];
             let trackedUniqueKey = new Set();
 
             if (activeVPAs.size > 0) {
                 serverCloudDataPool.forEach(item => {
-                    const itemVpa = String(item.VPA || '').trim();
+                    const itemVpa = String(item[2] || '').trim();
                     if (itemVpa && activeVPAs.has(itemVpa.toLowerCase())) {
-                        let uniqueRowID = `${itemVpa}_${item.DeviceSlNo}_${item.CorrectAWB}`;
+                        let uniqueRowID = `${itemVpa}_${item[1]}_${item[7]}`;
                         if (!trackedUniqueKey.has(uniqueRowID)) { trackedUniqueKey.add(uniqueRowID); finalResultSet.push(item); }
                     }
                 });
             }
 
             directMatches.forEach(item => {
-                const itemVpa = String(item.VPA || '');
-                let uniqueRowID = `${itemVpa}_${item.DeviceSlNo}_${item.CorrectAWB}`;
+                const itemVpa = String(item[2] || '');
+                let uniqueRowID = `${itemVpa}_${item[1]}_${item[7]}`;
                 if (!trackedUniqueKey.has(uniqueRowID)) { trackedUniqueKey.add(uniqueRowID); finalResultSet.push(item); }
             });
 
             tbody.innerHTML = finalResultSet.map(row => {
                 return `
                     <tr class="hover:bg-slate-50 border-b border-gray-100 transition-colors text-gray-700 font-medium">
-                        <td class="px-3 py-3 border-r border-gray-200 text-gray-400 font-mono">${row.SL || '-'}</td>
-                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 text-indigo-700 font-bold font-mono">${row.DeviceSlNo || '-'}</td>
-                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 text-indigo-600 font-bold font-mono">${row.VPA || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${row.DispatchDate || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 text-xs text-gray-500">${row.ModelBank || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${row.SIMNo || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 text-gray-600">${row.Courier || '-'}</td>
-                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 font-mono font-semibold text-gray-700">${row.CorrectAWB || '-'}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 text-gray-400 font-mono">${formatVal(row[0])}</td>
+                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 text-indigo-700 font-bold font-mono">${formatVal(row[1])}</td>
+                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 text-indigo-600 font-bold font-mono">${formatVal(row[2])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${formatVal(row[3])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 text-xs text-gray-500">${formatVal(row[4])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${formatVal(row[5])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 text-gray-600">${formatVal(row[6])}</td>
+                        <td class="px-4 py-3 border-r border-gray-200 bg-indigo-50/60 font-mono font-semibold text-gray-700">${formatVal(row[7])}</td>
                         <td class="px-3 py-3 border-r border-gray-200 text-center">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${String(row.Status).toUpperCase().includes('DELIVERED') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">${row.Status || '-'}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${String(row[8]).toUpperCase().includes('DELIVERED') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">${formatVal(row[8])}</span>
                         </td>
-                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${row.DeliveryDate || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 text-gray-600">${row.Location || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${row.RTOAWB || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 text-[10px] text-gray-500 uppercase tracking-wide font-mono">${row.OrderType || '-'}</td>
-                        <td class="px-3 py-3 border-r border-gray-200 italic text-gray-400 max-w-[150px] truncate" title="${row.RTOReason || '-'}">${row.RTOReason || '-'}</td>
-                        <td class="px-4 py-3 border-r border-gray-200 font-bold bg-indigo-50/10 text-gray-900 max-w-[200px] truncate" title="${row.ReceiverName || '-'}">${row.ReceiverName || '-'}</td>
-                        <td class="px-4 py-3 bg-indigo-50/10 max-w-[280px] truncate text-gray-500 text-xs" title="${row.DeliveryAddress || '-'}">${row.DeliveryAddress || '-'}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${formatVal(row[9])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 text-gray-600">${formatVal(row[10])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 font-mono text-gray-500">${formatVal(row[11])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 text-[10px] text-gray-500 uppercase tracking-wide font-mono">${formatVal(row[12])}</td>
+                        <td class="px-3 py-3 border-r border-gray-200 italic text-gray-400 max-w-[150px] truncate" title="${formatVal(row[13])}">${formatVal(row[13])}</td>
+                        <td class="px-4 py-3 border-r border-gray-200 font-bold bg-indigo-50/10 text-gray-900 max-w-[200px] truncate" title="${formatVal(row[14])}">${formatVal(row[14])}</td>
+                        <td class="px-4 py-3 bg-indigo-50/10 max-w-[280px] truncate text-gray-500 text-xs" title="${formatVal(row[15])}">${formatVal(row[15])}</td>
                     </tr>`;
             }).join('');
         }
