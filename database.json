@@ -1,0 +1,36 @@
+import pandas as pd
+import json
+import os
+
+excel_file = "J&K Recon till May 31st.xlsx"
+json_output = "database.json"
+
+print("🚀 Extracting rows for GitHub Production deployment...")
+df = pd.read_excel(excel_file, sheet_name="Dispatched DATA")
+df = df.fillna("")
+
+records = []
+for _, row in df.iterrows():
+    records.append({
+        "SL": str(row.get("SL", "")).strip(),
+        "DeviceSlNo": str(row.get("Device Sl No", "")).strip(),
+        "VPA": str(row.get("VPA", "")).strip(),
+        "DispatchDate": str(row.get("Dispatch Date", ""))[:10].strip(),
+        "ModelBank": str(row.get("Model-Bank", "")).strip(),
+        "SIMNo": str(row.get("SIM No", "")).strip(),
+        "Courier": str(row.get("Courier", "")).strip(),
+        "CorrectAWB": str(row.get("Correct AWB", "")).strip(),
+        "Status": str(row.get("Status", "")).strip(),
+        "DeliveryDate": str(row.get("Delivery Date", ""))[:10].strip(),
+        "Location": str(row.get("Location", "")).strip(),
+        "RTOAWB": str(row.get("RTO Shipment new AWB", "")).strip(),
+        "OrderType": str(row.get("Order Type", "")).strip(),
+        "RTOReason": str(row.get("RTO Reason", "")).strip(),
+        "ReceiverName": str(row.get("Receiver name", "")).strip(),
+        "DeliveryAddress": str(row.get("Delivery Address", "")).strip()
+    })
+
+with open(json_output, "w", encoding="utf-8") as f:
+    json.dump(records, f, indent=2)
+
+print(f"✅ Created unified 'database.json' containing {len(records)} production rows.")
