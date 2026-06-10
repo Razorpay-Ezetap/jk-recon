@@ -35,7 +35,7 @@
 
                 <div class="px-5">
                     <div id="status-badge" class="text-xs text-amber-700 flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Connecting to GitHub CDN...
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Stream Connection Syncing...
                     </div>
                 </div>
             </div>
@@ -113,17 +113,13 @@
     <script>
         let serverCloudDataPool = [];
 
-        // Fetch production-ready data arrays instantly on load initialization
         window.addEventListener('DOMContentLoaded', async () => {
             const badge = document.getElementById('status-badge');
             try {
-                // Fetch unified database layout stored relative to the index file
                 const response = await fetch('database.json');
                 if(!response.ok) throw new Error("File fetch failure");
                 
                 serverCloudDataPool = await response.json();
-                
-                // Initialize static KPI counts
                 updateDashboardMetrics(serverCloudDataPool);
                 
                 badge.className = "text-xs text-emerald-700 flex items-center gap-2 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200";
@@ -146,7 +142,6 @@
         function updateDashboardMetrics(recordsArray) {
             let delivered = 0, transit = 0, rto = 0, repair = 0;
             recordsArray.forEach(row => {
-                // Unified schema safe string matching parameters
                 const statusStr = String(row.Status || "").toUpperCase();
                 const typeStr = String(row.OrderType || "").toUpperCase();
                 if (statusStr.includes("DELIVERED")) delivered++;
@@ -180,7 +175,6 @@
 
             const cq = query.toLowerCase().trim();
             
-            // Scan across our cloud-delivered structural dictionary fields
             let directMatches = serverCloudDataPool.filter(item => {
                 return String(item.VPA || '').toLowerCase().trim() === cq || 
                        String(item.DeviceSlNo || '').toLowerCase().trim() === cq || 
@@ -193,10 +187,7 @@
             }
 
             let activeVPAs = new Set();
-            directMatches.forEach(item => { 
-                const vpaVal = String(item.VPA || '').trim();
-                if (vpaVal) activeVPAs.add(vpaVal.toLowerCase()); 
-            });
+            directMatches.forEach(item => { const vpaVal = String(item.VPA || '').trim(); if (vpaVal) activeVPAs.add(vpaVal.toLowerCase()); });
 
             let finalResultSet = [];
             let trackedUniqueKey = new Set();
